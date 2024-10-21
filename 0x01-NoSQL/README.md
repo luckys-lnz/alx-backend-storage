@@ -132,7 +132,7 @@ User.create({ name: 'John', age: 30 });
 
 # Conclusion
 
-This overview covers basic syntax and benefits of NoSQL databases.
+This overview covers basic syntax and benefits of NoSQL and mongoDB basic syntax.
 
 ### Learn More
 
