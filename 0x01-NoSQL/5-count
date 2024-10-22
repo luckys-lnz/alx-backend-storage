@@ -1,0 +1,3 @@
+// Displays num of collection in doc shool
+print(db.school.countDocuments({}))
+
