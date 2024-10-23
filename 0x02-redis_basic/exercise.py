@@ -14,6 +14,20 @@ int or float.
 import redis
 import uuid
 from typing import Union, Callable, Optional
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    """Decorator to count calls to a method using Redis."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """Increment the call count and call the original method."""
+        key = method.__qualname__
+        self._redis.incr(key)  # Increment the call count in Redis
+        return method(self, *args, **kwargs)  # Call the original method
+
+    return wrapper
 
 
 class Cache:
@@ -22,6 +36,8 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Generate a random key"""
         random_key = str(uuid.uuid4())
@@ -31,6 +47,7 @@ class Cache:
 
         # Return the random key
         return random_key
+
 
     def get(self, key: str, fn: Optional[Callable] = None
             ) -> Optional[Union[str, int, float]]:
@@ -42,6 +59,9 @@ class Cache:
 
         if fn:
             return fn(value)
+
+        return value
+
 
     def get_str(self, key: str) -> Optional[str]:
         """Retrieve a string value from Redis."""
