@@ -13,7 +13,7 @@ int or float.
 
 import redis
 import uuid
-from typing import Union
+from typing import Union, Callable, Optional
 
 
 class Cache:
@@ -31,3 +31,22 @@ class Cache:
 
         # Return the random key
         return random_key
+
+    def get(self, key: str, fn: Optional[Callable] = None
+            ) -> Optional[Union[str, int, float]]:
+        """Retrieve value from redisa and convert it using Callable"""
+        value = self._redis.get(key)
+
+        if value is None:
+            return None
+
+        if fn:
+            return fn(value)
+
+    def get_str(self, key: str) -> Optional[str]:
+        """Retrieve a string value from Redis."""
+        return self.get(key, lambda d: d.decode("utf-8"))
+
+    def get_int(self, key: str) -> Optional[int]:
+        """Retrieve an integer value from Redis."""
+        return self.get(key, int)
