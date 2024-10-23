@@ -91,3 +91,18 @@ class Cache:
     def get_int(self, key: str) -> Optional[int]:
         """Retrieve an integer value from Redis."""
         return self.get(key, int)
+
+def replay(method: Callable):
+    """Display the history of calls to a particular method."""
+    key = method.__qualname__
+    call_count = method.__self__._redis.get(key).decode('utf-8')
+    inputs = method.__self__._redis.lrange(f"{key}:inputs", 0, -1)
+    outputs = method.__self__._redis.lrange(f"{key}:outputs", 0, -1)
+
+    print(f"{key} was called {call_count} times:")
+
+    for input_data, output_data in zip(inputs, outputs):
+        # Decode input and output for better readability
+        input_args = eval(input_data.decode('utf-8'))
+        output_value = output_data.decode('utf-8')
+        print(f"{key}(*{input_args}) -> {output_value}")
